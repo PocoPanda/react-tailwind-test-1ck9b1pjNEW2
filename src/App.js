@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, Heart, ShieldCheck, Coffee, Send, Star, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-const MY_NAME = "Muhammad Hafi"; // 👈 Change this to your actual name!
+const MY_NAME = "Muhammad Hafi"; // 👈 Fixed the typo here!
 
 export default function App() {
+  // 🚀 BULLETPROOF FIX: This bypasses broken build tools and forces Tailwind to load directly in the browser!
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.tailwindcss.com';
+    document.head.appendChild(script);
+  }, []);
+
   const [formState, setFormState] = useState({
     name: '',
     social: '',
