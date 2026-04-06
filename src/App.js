@@ -1,13 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Heart, ShieldCheck, Coffee, Send, Star, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-const MY_NAME = "Muhammad Hafi"; // 👈 Fixed the typo here!
+const MY_NAME = "Muhammad Hafi";
 
 export default function App() {
-  // 🚀 BULLETPROOF FIX: This bypasses broken build tools and forces Tailwind to load directly in the browser!
+  const [isTailwindLoaded, setIsTailwindLoaded] = useState(false);
+
+  // 🚀 BULLETPROOF FIX V2: Waits for Tailwind to fully download before showing the site!
   useEffect(() => {
+    if (document.getElementById('tailwind-cdn')) {
+      setIsTailwindLoaded(true);
+      return;
+    }
+
     const script = document.createElement('script');
+    script.id = 'tailwind-cdn';
     script.src = 'https://cdn.tailwindcss.com';
+    
+    // When the script finishes downloading, configure the custom animations and show the site!
+    script.onload = () => {
+      if (window.tailwind) {
+        window.tailwind.config = {
+          theme: {
+            extend: {
+              animation: {
+                blob: "blob 7s infinite",
+              },
+              keyframes: {
+                blob: {
+                  "0%": { transform: "translate(0px, 0px) scale(1)" },
+                  "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+                  "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+                  "100%": { transform: "translate(0px, 0px) scale(1)" },
+                }
+              }
+            }
+          }
+        };
+      }
+      
+      // Add custom delay styles
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+      `;
+      document.head.appendChild(style);
+      
+      setIsTailwindLoaded(true);
+    };
+
+    script.onerror = () => setIsTailwindLoaded(true); // Fallback
+
     document.head.appendChild(script);
   }, []);
 
@@ -30,13 +74,22 @@ export default function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate network request
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSuccess(true);
     }, 1500);
   };
+
+  // Show a clean loading screen while waiting for styles
+  if (!isTailwindLoaded) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'system-ui, sans-serif', backgroundColor: '#f8fafc', color: '#334155' }}>
+        <div style={{ width: '48px', height: '48px', border: '5px solid #cbd5e1', borderTopColor: '#a855f7', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        <h2 style={{ marginTop: '24px', fontWeight: 'bold', fontSize: '1.25rem' }}>Loading Interface...</h2>
+      </div>
+    );
+  }
 
   if (isSuccess) {
     return (
@@ -62,7 +115,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-pink-200 font-sans">
-      {/* Hero Section */}
       <div className="relative overflow-hidden bg-white border-b border-slate-200">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl">
           <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
@@ -85,8 +137,6 @@ export default function App() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 grid grid-cols-1 lg:grid-cols-12 gap-16">
-        
-        {/* Left Column: Requirements & Info */}
         <div className="lg:col-span-5 space-y-12">
           <div>
             <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
@@ -123,7 +173,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Right Column: Application Form */}
         <div className="lg:col-span-7">
           <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
             <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-8 text-white">
@@ -132,8 +181,6 @@ export default function App() {
             </div>
             
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
-              
-              {/* Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 block">Full Name / Nickname</label>
@@ -161,7 +208,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Questionnaire */}
               <div className="space-y-6 pt-6 border-t border-slate-100">
                 <h3 className="font-bold text-xl text-slate-900">Vibe Check Questionnaire</h3>
 
@@ -220,7 +266,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Submit */}
               <button 
                 type="submit" 
                 disabled={isSubmitting}
@@ -249,7 +294,6 @@ export default function App() {
   );
 }
 
-// Helper Component
 function RequirementCard({ icon, title, desc }) {
   return (
     <div className="flex gap-4 group">
