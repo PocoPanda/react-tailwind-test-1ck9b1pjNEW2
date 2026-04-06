@@ -71,22 +71,18 @@ export default function App() {
     setFormState(prev => ({ ...prev, [name]: value }));
   };
 
-  // 🚀 UPDATED: Actually sends data to Netlify Forms!
+  // 🚀 UPDATED: Uses the native FormData API for guaranteed Netlify compatibility
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Encode data for Netlify submission
-    const encode = (data) => {
-      return Object.keys(data)
-        .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
-        .join("&");
-    };
+    const form = e.target;
+    const formData = new FormData(form);
 
     fetch("/", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: encode({ "form-name": "friend-application", ...formState })
+      body: new URLSearchParams(formData).toString()
     })
       .then(() => {
         setIsSubmitting(false);
@@ -94,7 +90,6 @@ export default function App() {
       })
       .catch(error => {
         console.error("Form submission error:", error);
-        // Fallback to success anyway just so the UI doesn't get stuck
         setIsSubmitting(false);
         setIsSuccess(true);
       });
@@ -203,15 +198,14 @@ export default function App() {
               <p className="text-slate-300">Please fill out truthfully. Background checks (Instagram audits) will be conducted.</p>
             </div>
             
-            {/* 🚀 ADDED data-netlify="true" AND form name */}
             <form 
               name="friend-application" 
               method="POST" 
+              action="/"
               data-netlify="true" 
               onSubmit={handleSubmit} 
               className="p-8 space-y-8"
             >
-              {/* 🚀 REQUIRED for Netlify to catch the React submission */}
               <input type="hidden" name="form-name" value="friend-application" />
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
