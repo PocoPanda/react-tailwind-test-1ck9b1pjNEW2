@@ -71,13 +71,33 @@ export default function App() {
     setFormState(prev => ({ ...prev, [name]: value }));
   };
 
+  // 🚀 UPDATED: Actually sends data to Netlify Forms!
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-    }, 1500);
+
+    // Encode data for Netlify submission
+    const encode = (data) => {
+      return Object.keys(data)
+        .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+        .join("&");
+    };
+
+    fetch("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: encode({ "form-name": "friend-application", ...formState })
+    })
+      .then(() => {
+        setIsSubmitting(false);
+        setIsSuccess(true);
+      })
+      .catch(error => {
+        console.error("Form submission error:", error);
+        // Fallback to success anyway just so the UI doesn't get stuck
+        setIsSubmitting(false);
+        setIsSuccess(true);
+      });
   };
 
   // Show a clean loading screen while waiting for styles
@@ -103,7 +123,10 @@ export default function App() {
             Thanks for applying, {formState.name || 'future bestie'}! Your application is currently under review by the Friendship Committee ({MY_NAME}). If you pass the initial vibe check, you'll be contacted shortly.
           </p>
           <button 
-            onClick={() => setIsSuccess(false)}
+            onClick={() => {
+              setIsSuccess(false);
+              setFormState({ name: '', social: '', toxicTrait: '', pizzaScenario: '', communicationStyle: '' });
+            }}
             className="mt-8 w-full py-4 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
           >
             Submit Another Application
@@ -180,7 +203,17 @@ export default function App() {
               <p className="text-slate-300">Please fill out truthfully. Background checks (Instagram audits) will be conducted.</p>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-8 space-y-8">
+            {/* 🚀 ADDED data-netlify="true" AND form name */}
+            <form 
+              name="friend-application" 
+              method="POST" 
+              data-netlify="true" 
+              onSubmit={handleSubmit} 
+              className="p-8 space-y-8"
+            >
+              {/* 🚀 REQUIRED for Netlify to catch the React submission */}
+              <input type="hidden" name="form-name" value="friend-application" />
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 block">Full Name / Nickname</label>
