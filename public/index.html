@@ -1,2 +1,11 @@
 <div id="root"></div>
-<body><form name="friend-application" netlify hidden></form></body>
+<body><form name="friend-application" netlify hidden></form>
+  <!-- Hidden form to tell Netlify what fields to expect -->
+    <form name="friend-application" netlify hidden>
+      <input type="text" name="name" />
+      <input type="text" name="social" />
+      <input type="text" name="communicationStyle" />
+      <input type="text" name="pizzaScenario" />
+      <textarea name="toxicTrait"></textarea>
+    </form>
+</body>
